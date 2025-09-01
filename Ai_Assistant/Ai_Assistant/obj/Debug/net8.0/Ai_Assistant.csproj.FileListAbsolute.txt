@@ -1,0 +1,14 @@
+C:\Users\baraa\source\repos\Ai_Assistant\Ai_Assistant\bin\Debug\net8.0\Ai_Assistant.exe
+C:\Users\baraa\source\repos\Ai_Assistant\Ai_Assistant\bin\Debug\net8.0\Ai_Assistant.deps.json
+C:\Users\baraa\source\repos\Ai_Assistant\Ai_Assistant\bin\Debug\net8.0\Ai_Assistant.runtimeconfig.json
+C:\Users\baraa\source\repos\Ai_Assistant\Ai_Assistant\bin\Debug\net8.0\Ai_Assistant.dll
+C:\Users\baraa\source\repos\Ai_Assistant\Ai_Assistant\bin\Debug\net8.0\Ai_Assistant.pdb
+C:\Users\baraa\source\repos\Ai_Assistant\Ai_Assistant\obj\Debug\net8.0\Ai_Assistant.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\baraa\source\repos\Ai_Assistant\Ai_Assistant\obj\Debug\net8.0\Ai_Assistant.AssemblyInfoInputs.cache
+C:\Users\baraa\source\repos\Ai_Assistant\Ai_Assistant\obj\Debug\net8.0\Ai_Assistant.AssemblyInfo.cs
+C:\Users\baraa\source\repos\Ai_Assistant\Ai_Assistant\obj\Debug\net8.0\Ai_Assistant.csproj.CoreCompileInputs.cache
+C:\Users\baraa\source\repos\Ai_Assistant\Ai_Assistant\obj\Debug\net8.0\Ai_Assistant.dll
+C:\Users\baraa\source\repos\Ai_Assistant\Ai_Assistant\obj\Debug\net8.0\refint\Ai_Assistant.dll
+C:\Users\baraa\source\repos\Ai_Assistant\Ai_Assistant\obj\Debug\net8.0\Ai_Assistant.pdb
+C:\Users\baraa\source\repos\Ai_Assistant\Ai_Assistant\obj\Debug\net8.0\Ai_Assistant.genruntimeconfig.cache
+C:\Users\baraa\source\repos\Ai_Assistant\Ai_Assistant\obj\Debug\net8.0\ref\Ai_Assistant.dll

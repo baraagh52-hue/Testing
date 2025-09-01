@@ -1,0 +1,69 @@
+@page "/dashboard"
+@inject ToDoIntegration ToDoIntegration
+@inject PrayerTimes PrayerTimes
+@inject ActivityWatchIntegration ActivityWatchIntegration
+@inject WifiPresence WifiPresence
+
+<h1>AI Assistant Dashboard</h1>
+
+<div class="row">
+    <div class="col">
+        <h2>Tasks</h2>
+        <ul>
+            @if (overdueTasks == null)
+            {
+                <li>Loading...</li>
+            }
+            else if (overdueTasks.Count == 0)
+            {
+                <li>No overdue tasks!</li>
+            }
+            else
+            {
+                foreach (var task in overdueTasks)
+                {
+                    <li>@task</li>
+                }
+            }
+        </ul>
+    </div>
+    <div class="col">
+        <h2>Prayer Times</h2>
+        <ul>
+            @if (prayerTimes == null)
+            {
+                <li>Loading...</li>
+            }
+            else
+            {
+                foreach (var kvp in prayerTimes)
+                {
+                    <li>@kvp.Key: @kvp.Value</li>
+                }
+            }
+        </ul>
+    </div>
+    <div class="col">
+        <h2>PC Activity</h2>
+        <p>@activity</p>
+    </div>
+    <div class="col">
+        <h2>Home Presence</h2>
+        <p>@(isHome ? "Phone is connected to Wi-Fi." : "Phone is not connected.")</p>
+    </div>
+</div>
+
+@code {
+    List<string> overdueTasks;
+    Dictionary<string, string> prayerTimes;
+    string activity;
+    bool isHome;
+
+    protected override async Task OnInitializedAsync()
+    {
+        overdueTasks = await ToDoIntegration.GetOverdueTasksAsync();
+        prayerTimes = await PrayerTimes.GetPrayerTimesAsync("YourCity", "YourCountry");
+        activity = await ActivityWatchIntegration.GetCurrentActivityAsync();
+        isHome = WifiPresence.IsPhoneConnected();
+    }
+}

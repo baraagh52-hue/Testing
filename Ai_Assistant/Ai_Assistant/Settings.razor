@@ -1,0 +1,34 @@
+@page "/settings"
+@using Ai_Assistant
+
+<h1>Settings</h1>
+
+<div>
+    <label>Location (City):</label>
+    <input @bind="city" />
+</div>
+<div>
+    <label>Location (Country):</label>
+    <input @bind="country" />
+</div>
+<div>
+    <label>Microsoft To-Do API Token:</label>
+    <input @bind="apiToken" />
+</div>
+<div>
+    <label>Phone IP Address:</label>
+    <input @bind="phoneIp" />
+</div>
+<button @onclick="SaveSettings">Save</button>
+
+@code {
+    string city = "YourCity";
+    string country = "YourCountry";
+    string apiToken = "";
+    string phoneIp = "192.168.1.100";
+
+    void SaveSettings()
+    {
+        // TODO: Save settings to config file or database
+    }
+}
