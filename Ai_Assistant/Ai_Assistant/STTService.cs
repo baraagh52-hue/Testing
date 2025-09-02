@@ -5,9 +5,9 @@ namespace Ai_Assistant
 {
     public class STTService
     {
-        private readonly SettingsService _settingsService;
+        private readonly ISettingsService _settingsService;
 
-        public STTService(SettingsService settingsService)
+        public STTService(ISettingsService settingsService)
         {
             _settingsService = settingsService;
         }
