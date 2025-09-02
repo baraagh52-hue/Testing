@@ -1,3 +1,4 @@
+
 @page "/"
 @using Ai_Assistant
 @inject ToDoIntegration ToDoIntegration
@@ -63,8 +64,8 @@
     protected override async Task OnInitializedAsync()
     {
         overdueTasks = await ToDoIntegration.GetOverdueTasksAsync();
-        prayerTimes = await PrayerTimes.GetPrayerTimesAsync("YourCity", "YourCountry");
+        prayerTimes = await PrayerTimes.GetPrayerTimesAsync();
         activity = await ActivityWatchIntegration.GetCurrentActivityAsync();
-        isHome = WifiPresence.IsPhoneConnected();
+        isHome = await WifiPresence.IsPhoneConnectedAsync();
     }
 }

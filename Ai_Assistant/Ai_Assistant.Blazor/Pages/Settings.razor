@@ -2,6 +2,36 @@
 
 <h1>Settings</h1>
 
-<p>Here you can configure your assistant's settings.</p>
+<div class="form-group">
+    <label for="accessToken">To-Do Access Token</label>
+    <input type="text" class="form-control" id="accessToken" @bind="Settings.ToDoAccessToken" />
+</div>
 
-@* Placeholder for the settings content *@
+<div class="form-group">
+    <label for="city">City</label>
+    <input type="text" class="form-control" id="city" @bind="Settings.City" />
+</div>
+
+<div class="form-group">
+    <label for="country">Country</label>
+    <input type="text" class="form-control" id="country" @bind="Settings.Country" />
+</div>
+
+<button class="btn btn-primary" @onclick="SaveSettings">Save</button>
+
+@code {
+    private class SettingsModel
+    {
+        public string ToDoAccessToken { get; set; }
+        public string City { get; set; }
+        public string Country { get; set; }
+    }
+
+    private SettingsModel Settings = new SettingsModel();
+
+    private void SaveSettings()
+    {
+        // Save settings to a file or database
+        Console.WriteLine($"Saving settings: {Settings.ToDoAccessToken}, {Settings.City}, {Settings.Country}");
+    }
+}

@@ -1,34 +1,45 @@
+
 @page "/settings"
 @using Ai_Assistant
+@inject ISettingsService SettingsService
 
 <h1>Settings</h1>
 
-<div>
-    <label>Location (City):</label>
-    <input @bind="city" />
-</div>
-<div>
-    <label>Location (Country):</label>
-    <input @bind="country" />
-</div>
-<div>
-    <label>Microsoft To-Do API Token:</label>
-    <input @bind="apiToken" />
-</div>
-<div>
-    <label>Phone IP Address:</label>
-    <input @bind="phoneIp" />
-</div>
-<button @onclick="SaveSettings">Save</button>
+@if (settings == null)
+{
+    <p>Loading...</p>
+}
+else
+{
+    <div>
+        <label>Location (City):</label>
+        <input @bind="settings.City" />
+    </div>
+    <div>
+        <label>Location (Country):</label>
+        <input @bind="settings.Country" />
+    </div>
+    <div>
+        <label>Microsoft To-Do API Token:</label>
+        <input @bind="settings.ApiToken" />
+    </div>
+    <div>
+        <label>Phone IP Address:</label>
+        <input @bind="settings.PhoneIp" />
+    </div>
+    <button @onclick="SaveSettings">Save</button>
+}
 
 @code {
-    string city = "YourCity";
-    string country = "YourCountry";
-    string apiToken = "";
-    string phoneIp = "192.168.1.100";
+    private Settings settings;
 
-    void SaveSettings()
+    protected override async Task OnInitializedAsync()
     {
-        // TODO: Save settings to config file or database
+        settings = await SettingsService.LoadSettingsAsync();
+    }
+
+    async Task SaveSettings()
+    {
+        await SettingsService.SaveSettingsAsync(settings);
     }
 }

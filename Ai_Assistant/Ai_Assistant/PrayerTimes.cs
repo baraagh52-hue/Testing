@@ -1,3 +1,4 @@
+
 using System;
 using System.Collections.Generic;
 using System.Net.Http;
@@ -9,14 +10,21 @@ namespace Ai_Assistant
     public class PrayerTimes
     {
         private readonly HttpClient _httpClient = new();
+        private readonly ISettingsService _settingsService;
 
-        public async Task<Dictionary<string, string>> GetPrayerTimesAsync(string city, string country)
+        public PrayerTimes(ISettingsService settingsService)
+        {
+            _settingsService = settingsService;
+        }
+
+        public async Task<Dictionary<string, string>> GetPrayerTimesAsync()
         {
             var timings = new Dictionary<string, string>();
             try
             {
-                var encodedCity = Uri.EscapeDataString(city ?? "");
-                var encodedCountry = Uri.EscapeDataString(country ?? "");
+                var settings = await _settingsService.LoadSettingsAsync();
+                var encodedCity = Uri.EscapeDataString(settings.City ?? "");
+                var encodedCountry = Uri.EscapeDataString(settings.Country ?? "");
                 var url = $"https://api.aladhan.com/v1/timingsByCity?city={encodedCity}&country={encodedCountry}";
                 Console.WriteLine($"Requesting: {url}");
                 var response = await _httpClient.GetStringAsync(url);

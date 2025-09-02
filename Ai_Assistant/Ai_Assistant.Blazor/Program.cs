@@ -14,6 +14,10 @@ builder.Services.AddSingleton<ToDoIntegration>();
 builder.Services.AddSingleton<PrayerTimes>();
 builder.Services.AddSingleton<ActivityWatchIntegration>();
 builder.Services.AddSingleton<WifiPresence>();
+builder.Services.AddSingleton<TTSService>();
+builder.Services.AddSingleton<STTService>();
+builder.Services.AddSingleton<WakeWordService>();
+builder.Services.AddHostedService<AssistantService>();
 
 var app = builder.Build();
 
