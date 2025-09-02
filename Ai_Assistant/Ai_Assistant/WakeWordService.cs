@@ -6,9 +6,9 @@ namespace Ai_Assistant
 {
     public class WakeWordService
     {
-        private readonly SettingsService _settingsService;
+        private readonly ISettingsService _settingsService;
 
-        public WakeWordService(SettingsService settingsService)
+        public WakeWordService(ISettingsService settingsService)
         {
             _settingsService = settingsService;
         }
@@ -25,8 +25,7 @@ namespace Ai_Assistant
             {
                 StartInfo = new ProcessStartInfo
                 {
-                    FileName = "python",
-                    Arguments = $"{settings.WakeWordScript} --keyword_file_path {settings.WakeWordKeywordFile} --model_file_path {settings.WakeWordModelFile} --audio_device_index {settings.WakeWordAudioDevice}",
+                    FileName = settings.WakeWordScript,
                     RedirectStandardOutput = true,
                     UseShellExecute = false,
                     CreateNoWindow = true,
@@ -34,9 +33,10 @@ namespace Ai_Assistant
             };
 
             process.Start();
+            var output = await process.StandardOutput.ReadToEndAsync();
             await process.WaitForExitAsync(cancellationToken);
 
-            return process.ExitCode == 0;
+            return output.Trim().ToLower() == "true";
         }
     }
 }
