@@ -16,6 +16,7 @@ namespace Ai_Assistant
         private readonly TTSService _ttsService;
         private readonly STTService _sttService;
         private readonly WakeWordService _wakeWordService;
+        private readonly ISettingsService _settingsService;
 
         public AssistantService(
             ToDoIntegration toDoIntegration,
@@ -24,7 +25,8 @@ namespace Ai_Assistant
             WifiPresence wifiPresence,
             TTSService ttsService,
             STTService sttService,
-            WakeWordService wakeWordService)
+            WakeWordService wakeWordService,
+            ISettingsService settingsService)
         {
             _toDoIntegration = toDoIntegration;
             _activityWatchIntegration = activityWatchIntegration;
@@ -33,6 +35,7 @@ namespace Ai_Assistant
             _ttsService = ttsService;
             _sttService = sttService;
             _wakeWordService = wakeWordService;
+            _settingsService = settingsService;
         }
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
@@ -80,7 +83,8 @@ namespace Ai_Assistant
 
         private async Task CheckPrayerTimes()
         {
-            var times = await _prayerTimes.GetPrayerTimesAsync("YourCity", "YourCountry");
+            var settings = await _settingsService.LoadSettingsAsync();
+            var times = await _prayerTimes.GetPrayerTimesAsync(settings.City, settings.Country);
             if (times.Count > 0)
             {
                 var msg = "Today's prayer times: " + string.Join(", ", times.Select(kvp => $"{kvp.Key}: {kvp.Value}"));

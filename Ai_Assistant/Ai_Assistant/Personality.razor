@@ -1,0 +1,109 @@
+
+@page "/personality"
+@using Ai_Assistant
+@inject PersonalityService PersonalityService
+
+<h3>AI Personalities</h3>
+
+<div class="mb-3">
+    <label for="active-personality" class="form-label">Active Personality</label>
+    <select id="active-personality" class="form-select" @onchange="OnActivePersonalityChanged">
+        @foreach (var personality in _personalities)
+        {
+            <option value="@personality.Name" selected="@(personality.Name == _activePersonality?.Name)">@personality.Name</option>
+        }
+    </select>
+</div>
+
+<hr />
+
+<h4>Create or Edit a Personality</h4>
+
+<div class="mb-3">
+    <label for="personality-name" class="form-label">Name</label>
+    <input id="personality-name" class="form-control" @bind="_newPersonality.Name" />
+</div>
+
+<div class="mb-3">
+    <label for="personality-prompt" class="form-label">Prompt</label>
+    <textarea id="personality-prompt" class="form-control" rows="5" @bind="_newPersonality.Prompt"></textarea>
+</div>
+
+<button class="btn btn-primary" @onclick="OnSavePersonality">Save</button>
+<button class="btn btn-danger" @onclick="OnDeletePersonality">Delete</button>
+
+<hr />
+
+<h4>Existing Personalities</h4>
+
+<ul class="list-group">
+    @foreach (var personality in _personalities)
+    {
+        <li class="list-group-item d-flex justify-content-between align-items-center">
+            <span>@personality.Name</span>
+            <div>
+                <button class="btn btn-secondary btn-sm" @onclick="() => OnEditPersonality(personality)">Edit</button>
+            </div>
+        </li>
+    }
+</ul>
+
+@code {
+    private List<Personality> _personalities;
+    private Personality _activePersonality;
+    private Personality _newPersonality = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadPersonalities();
+    }
+
+    private async Task LoadPersonalities()
+    {
+        await PersonalityService.LoadPersonalitiesAsync();
+        _personalities = PersonalityService.GetPersonalities();
+        _activePersonality = PersonalityService.GetActivePersonality();
+    }
+
+    private async Task OnActivePersonalityChanged(ChangeEventArgs e)
+    {
+        var newActivePersonalityName = e.Value.ToString();
+        await PersonalityService.SetActivePersonalityAsync(newActivePersonalityName);
+        _activePersonality = _personalities.FirstOrDefault(p => p.Name == newActivePersonalityName);
+    }
+
+    private async Task OnSavePersonality()
+    {
+        if (!string.IsNullOrWhiteSpace(_newPersonality.Name))
+        {
+            var existingPersonality = _personalities.FirstOrDefault(p => p.Name == _newPersonality.Name);
+            if (existingPersonality != null)
+            {                
+                await PersonalityService.UpdatePersonalityAsync(_newPersonality);
+            }
+            else
+            {
+                await PersonalityService.AddPersonalityAsync(_newPersonality);
+            }
+            _newPersonality = new();
+            await LoadPersonalities();
+            StateHasChanged();
+        }
+    }
+
+    private async Task OnDeletePersonality()
+    {
+        if (!string.IsNullOrWhiteSpace(_newPersonality.Name))
+        {
+            await PersonalityService.DeletePersonalityAsync(_newPersonality.Name);
+            _newPersonality = new();
+            await LoadPersonalities();
+            StateHasChanged();
+        }
+    }
+
+    private void OnEditPersonality(Personality personality)
+    {
+        _newPersonality = new Personality { Name = personality.Name, Prompt = personality.Prompt };
+    }
+}

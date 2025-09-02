@@ -27,6 +27,10 @@ else
         <label>Phone IP Address:</label>
         <input @bind="settings.PhoneIp" />
     </div>
+    <div>
+        <label>Local LLM URL:</label>
+        <input @bind="settings.LocalLLMUrl" />
+    </div>
     <button @onclick="SaveSettings">Save</button>
 }
 

@@ -18,6 +18,8 @@ builder.Services.AddSingleton<TTSService>();
 builder.Services.AddSingleton<STTService>();
 builder.Services.AddSingleton<WakeWordService>();
 builder.Services.AddHostedService<AssistantService>();
+builder.Services.AddSingleton<PersonalityService>();
+builder.Services.AddSingleton<LocalLLMService>();
 
 var app = builder.Build();
 
