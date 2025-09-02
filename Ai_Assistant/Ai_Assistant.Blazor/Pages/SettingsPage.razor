@@ -63,12 +63,12 @@ else
 }
 
 @code {
-    private Ai_Assistant.Settings _settings;
-    private string _newUnproductiveApp;
+    private Ai_Assistant.Settings _settings = null!;
+    private string _newUnproductiveApp = string.Empty;
 
     protected override async Task OnInitializedAsync()
     {
-        _settings = (Ai_Assistant.Settings)await SettingsService.LoadSettingsAsync();
+        _settings = await SettingsService.LoadSettingsAsync();
     }
 
     private void AddUnproductiveApp()
