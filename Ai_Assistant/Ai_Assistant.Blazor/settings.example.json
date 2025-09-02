@@ -1,0 +1,30 @@
+{
+  "City": "YourCity",
+  "Country": "YourCountry",
+  "ApiToken": "YourApiToken",
+  "PhoneIp": "192.168.1.100",
+  "Personalities": [
+    {
+      "Name": "Default",
+      "Prompt": "You are a helpful assistant."
+    }
+  ],
+  "ActivePersonalityName": "Default",
+  "LocalLLMUrl": "http://localhost:11434",
+  "ActivityWatchUrl": "http://localhost:5600",
+  "LocalLLMModel": "mistral",
+  "PrayerTimesApiUrl": "http://api.aladhan.com/v1/timingsByCity",
+  "TtsScript": "/path/to/your/tts/script.py",
+  "TtsOutputPath": "/path/to/your/output/folder",
+  "SttScript": "/path/to/your/stt/script.py",
+  "SttModelPath": "/path/to/your/stt/model",
+  "WakeWordScript": "/path/to/your/wakeword/script.py",
+  "WakeWordKeywordFile": "/path/to/your/keyword/file.ppn",
+  "WakeWordModelFile": "/path/to/your/model/file.pv",
+  "WakeWordAudioDevice": "your_audio_device",
+  "UnproductiveApps": [
+    "youtube",
+    "reddit",
+    "netflix"
+  ]
+}

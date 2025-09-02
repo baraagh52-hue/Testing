@@ -81,7 +81,6 @@ namespace Ai_Assistant
                 if (!_isConversing)
                 {
                     await CheckTasks();
-                    await CheckPrayerTimes();
                     await CheckWifiPresence();
                     await CheckActivity();
                 }
@@ -101,19 +100,6 @@ namespace Ai_Assistant
             }
         }
 
-        private async Task CheckPrayerTimes()
-        {
-            if (_isConversing) return;
-            var settings = await _settingsService.LoadSettingsAsync();
-            var times = await _prayerTimes.GetPrayerTimesAsync(settings.City, settings.Country);
-            if (times.Count > 0)
-            {
-                var msg = "Today's prayer times: " + string.Join(", ", times.Select(kvp => $"{kvp.Key}: {kvp.Value}"));
-                Console.WriteLine(msg);
-                await _ttsService.SpeakAsync(msg);
-            }
-        }
-
         private async Task CheckWifiPresence()
         {
             if (_isConversing) return;
@@ -126,10 +112,25 @@ namespace Ai_Assistant
         private async Task CheckActivity()
         {
             if (_isConversing) return;
+
+            var settings = await _settingsService.LoadSettingsAsync();
+            if (settings.UnproductiveApps == null || !settings.UnproductiveApps.Any())
+            {
+                Console.WriteLine("No unproductive apps configured.");
+                return;
+            }
+
             var activity = await _activityWatchIntegration.GetCurrentActivityAsync();
-            var msg = $"Current PC activity: {activity}";
-            Console.WriteLine(msg);
-            await _ttsService.SpeakAsync(msg);
+            if (string.IsNullOrEmpty(activity)) return;
+
+            string unproductiveApp = settings.UnproductiveApps.FirstOrDefault(app => activity.ToLower().Contains(app.ToLower()));
+
+            if (unproductiveApp != null)
+            {
+                var msg = $"It looks like you are using {unproductiveApp}, which you consider unproductive. Let's get back to work!";
+                Console.WriteLine(msg);
+                await _ttsService.SpeakAsync(msg);
+            }
         }
     }
 }

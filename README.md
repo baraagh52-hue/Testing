@@ -9,7 +9,7 @@ This is a personal AI assistant application built with .NET and Blazor. It provi
 *   **Prayer Times:** Calculates and displays daily prayer times in 24-hour format, along with the time remaining until the next prayer.
 *   **To-Do List Integration:** Manages your tasks by integrating with a to-do list.
 *   **Presence Detection:** Can detect user presence via WiFi networks.
-*   **Activity Tracking:** Integrates with ActivityWatch to monitor your activity.
+*   **Activity Tracking:** Integrates with ActivityWatch to monitor your activity and provide "nudges" when you're on unproductive apps.
 *   **Dashboard:** A central dashboard to view information from all integrated services.
 *   **Centralized Settings:** All service settings are managed in a single `settings.json` file.
 *   **Settings UI:** A dedicated settings page in the Blazor UI allows for easy modification of all settings.
@@ -35,6 +35,14 @@ export PATH="$HOME/.dotnet:$PATH"
 ### Configuration
 
 Before building, you may need to configure the application by creating a `settings.json` file in the `Ai_Assistant/Ai_Assistant.Blazor/` directory. This file holds the configuration for the various services. An example `settings.example.json` is provided.
+
+### Setting Up ActivityWatch
+
+The AI Assistant uses ActivityWatch to monitor your PC activity. To get this feature working, you need to:
+
+1.  **Install ActivityWatch:** Download and install the latest version of ActivityWatch from the [official website](https://activitywatch.net/downloads).
+2.  **Enable the REST API:** The AI Assistant communicates with ActivityWatch through its REST API. Make sure it is enabled in your ActivityWatch settings.
+3.  **Configure the URL:** In the AI Assistant's settings page, ensure the "ActivityWatch URL" is set to the correct address (by default, it's `http://localhost:5600`).
 
 ### Building the Debian Package
 

@@ -1,37 +1,98 @@
+
 @page "/settings"
+@using Ai_Assistant
+@inject ISettingsService SettingsService
+@inject NavigationManager NavigationManager
 
 <h1>Settings</h1>
 
-<div class="form-group">
-    <label for="accessToken">To-Do Access Token</label>
-    <input type="text" class="form-control" id="accessToken" @bind="Settings.ToDoAccessToken" />
-</div>
+@if (_settings == null)
+{
+    <p>Loading...</p>
+}
+else
+{
+    <div class="form-group">
+        <label for="city">City</label>
+        <input type="text" class="form-control" id="city" @bind="_settings.City" />
+    </div>
+    <div class="form-group">
+        <label for="country">Country</label>
+        <input type="text" class="form-control" id="country" @bind="_settings.Country" />
+    </div>
+    <div class="form-group">
+        <label for="apiToken">To-Do API Token</label>
+        <input type="text" class="form-control" id="apiToken" @bind="_settings.ApiToken" />
+    </div>
+    <div class="form-group">
+        <label for="phoneIp">Phone IP</label>
+        <input type="text" class="form-control" id="phoneIp" @bind="_settings.PhoneIp" />
+    </div>
+    <div class="form-group">
+        <label for="localLLMUrl">Local LLM URL</label>
+        <input type="text" class="form-control" id="localLLMUrl" @bind="_settings.LocalLLMUrl" />
+    </div>
+    <div class="form-group">
+        <label for="activityWatchUrl">ActivityWatch URL</label>
+        <input type="text" class="form-control" id="activityWatchUrl" @bind="_settings.ActivityWatchUrl" />
+    </div>
 
-<div class="form-group">
-    <label for="city">City</label>
-    <input type="text" class="form-control" id="city" @bind="Settings.City" />
-</div>
+    <div class="form-group">
+        <label for="unproductiveApps">Unproductive Apps</label>
+        <div class="input-group mb-3">
+            <input type="text" class="form-control" @bind="_newUnproductiveApp" placeholder="Add a new app" />
+            <div class="input-group-append">
+                <button class="btn btn-outline-secondary" type="button" @onclick="AddUnproductiveApp">Add</button>
+            </div>
+        </div>
+        <ul class="list-group">
+            @if (_settings.UnproductiveApps != null)
+            {
+                @foreach (var app in _settings.UnproductiveApps)
+                {
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        @app
+                        <button class="btn btn-danger btn-sm" @onclick="() => RemoveUnproductiveApp(app)">Remove</button>
+                    </li>
+                }
+            }
+        </ul>
+    </div>
 
-<div class="form-group">
-    <label for="country">Country</label>
-    <input type="text" class="form-control" id="country" @bind="Settings.Country" />
-</div>
-
-<button class="btn btn-primary" @onclick="SaveSettings">Save</button>
+    <button class="btn btn-primary" @onclick="SaveSettings">Save</button>
+}
 
 @code {
-    private class SettingsModel
+    private Settings _settings;
+    private string _newUnproductiveApp;
+
+    protected override async Task OnInitializedAsync()
     {
-        public string ToDoAccessToken { get; set; }
-        public string City { get; set; }
-        public string Country { get; set; }
+        _settings = await SettingsService.LoadSettingsAsync();
     }
 
-    private SettingsModel Settings = new SettingsModel();
-
-    private void SaveSettings()
+    private void AddUnproductiveApp()
     {
-        // Save settings to a file or database
-        Console.WriteLine($"Saving settings: {Settings.ToDoAccessToken}, {Settings.City}, {Settings.Country}");
+        if (!string.IsNullOrWhiteSpace(_newUnproductiveApp))
+        {
+            _settings.UnproductiveApps ??= new System.Collections.Generic.List<string>();
+            if (!_settings.UnproductiveApps.Contains(_newUnproductiveApp))
+            {
+                _settings.UnproductiveApps.Add(_newUnproductiveApp);
+                _newUnproductiveApp = string.Empty;
+            }
+        }
+    }
+
+    private void RemoveUnproductiveApp(string app)
+    {
+        _settings.UnproductiveApps?.Remove(app);
+    }
+
+    private async Task SaveSettings()
+    {
+        await SettingsService.SaveSettingsAsync(_settings);
+        // Optionally, provide feedback to the user
+        NavigationManager.NavigateTo("/settings", true);
     }
 }

@@ -23,5 +23,6 @@ namespace Ai_Assistant
         public string WakeWordKeywordFile { get; set; }
         public string WakeWordModelFile { get; set; }
         public string WakeWordAudioDevice { get; set; }
+        public List<string> UnproductiveApps { get; set; }
     }
 }
