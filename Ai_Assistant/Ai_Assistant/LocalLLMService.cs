@@ -7,10 +7,10 @@ namespace Ai_Assistant
 {
     public class LocalLLMService
     {
-        private readonly SettingsService _settingsService;
+        private readonly ISettingsService _settingsService;
         private readonly HttpClient _httpClient;
 
-        public LocalLLMService(SettingsService settingsService, HttpClient httpClient)
+        public LocalLLMService(ISettingsService settingsService, HttpClient httpClient)
         {
             _settingsService = settingsService;
             _httpClient = httpClient;

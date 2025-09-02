@@ -5,9 +5,9 @@ namespace Ai_Assistant
 {
     public class TTSService
     {
-        private readonly SettingsService _settingsService;
+        private readonly ISettingsService _settingsService;
 
-        public TTSService(SettingsService settingsService)
+        public TTSService(ISettingsService settingsService)
         {
             _settingsService = settingsService;
         }
