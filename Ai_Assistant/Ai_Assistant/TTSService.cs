@@ -14,7 +14,7 @@ namespace Ai_Assistant
 
         public async Task SpeakAsync(string text)
         {
-            var settings = await _settingsService.GetSettings();
+            var settings = await _settingsService.LoadSettingsAsync();
             if (string.IsNullOrEmpty(settings?.TtsScript) || string.IsNullOrEmpty(settings.TtsOutputPath))
             {
                 // Handle missing settings gracefully

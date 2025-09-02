@@ -14,7 +14,7 @@ namespace Ai_Assistant
 
         public async Task<string> RecognizeFromMicrophoneAsync()
         {
-            var settings = await _settingsService.GetSettings();
+            var settings = await _settingsService.LoadSettingsAsync();
             if (string.IsNullOrEmpty(settings?.SttScript) || string.IsNullOrEmpty(settings.SttModelPath))
             {
                 return "STT settings are not configured.";

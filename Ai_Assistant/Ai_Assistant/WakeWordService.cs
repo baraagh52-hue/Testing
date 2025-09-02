@@ -15,7 +15,7 @@ namespace Ai_Assistant
 
         public async Task<bool> IsWakeWordDetected(CancellationToken cancellationToken)
         {
-            var settings = await _settingsService.GetSettings();
+            var settings = await _settingsService.LoadSettingsAsync();
             if (string.IsNullOrEmpty(settings?.WakeWordScript))
             {
                 return false;

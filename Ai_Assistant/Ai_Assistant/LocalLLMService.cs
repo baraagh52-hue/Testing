@@ -18,7 +18,7 @@ namespace Ai_Assistant
 
         public async Task<string> GenerateResponse(string prompt)
         {
-            var settings = await _settingsService.GetSettings();
+            var settings = await _settingsService.LoadSettingsAsync();
             if (settings == null || string.IsNullOrEmpty(settings.LocalLLMUrl) || string.IsNullOrEmpty(settings.LocalLLMModel))
             {
                 return "Settings for local LLM are not configured.";

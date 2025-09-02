@@ -81,12 +81,12 @@ namespace Ai_Assistant
             }
             else if (response.Contains("next prayer"))
             {
-                var nextPrayer = await _prayerTimes.GetNextPrayer();
+                var nextPrayer = await _prayerTimes.GetPrayerTimesAsync();
                 response = $"The next prayer is {nextPrayer}";
             }
             else if (response.Contains("phone connected"))
             {
-                var isConnected = await _wifiPresence.IsPhoneConnected();
+                var isConnected = await _wifiPresence.IsPhoneConnectedAsync();
                 response = isConnected ? "Yes, your phone is connected to the network." : "No, your phone is not on the network.";
             }
             else if (response.Contains("unproductive time"))
