@@ -16,7 +16,7 @@ namespace Ai_Assistant
                 var json = await File.ReadAllTextAsync(_settingsFilePath);
                 _currentSettings = JsonSerializer.Deserialize<Settings>(json);
             }
-            return _currentSettings;
+            return _currentSettings ?? new Settings();
         }
 
         public async Task SaveSettingsAsync(Settings settings)
