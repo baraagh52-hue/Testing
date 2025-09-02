@@ -94,20 +94,6 @@ namespace Ai_Assistant
                 var unproductiveTime = await _activityWatchService.GetTotalUnproductiveTimeAsync();
                 response = $"You have spent {unproductiveTime} on unproductive tasks today.";
             }
-            else if (response.Contains("add to-do"))
-            {
-                // Extract the to-do item from the response
-                string? toDoItem = response.Split("add to-do").LastOrDefault()?.Trim();
-                if (!string.IsNullOrEmpty(toDoItem))
-                {
-                    await _toDoIntegration.AddToDoItem(toDoItem);
-                    response = $"I've added \"{toDoItem}\" to your to-do list.";
-                }
-                else
-                {
-                    response = "Sorry, I couldn't figure out what to add.";
-                }
-            }
 
             await _ttsService.SpeakAsync(response);
         }
