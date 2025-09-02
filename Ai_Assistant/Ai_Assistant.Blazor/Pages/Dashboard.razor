@@ -40,13 +40,7 @@
         }
         else
         {
-            <ul>
-                @foreach (var kvp in prayerTimes)
-                {
-                    <li>@kvp.Key: @DateTime.Parse(kvp.Value).ToString("HH:mm")</li>
-                }
-            </ul>
-            <p>Next prayer in: @nextPrayerTimeRemaining</p>
+            <p>@prayerTimes</p>
         }
     </div>
     <div class="col">
@@ -61,10 +55,9 @@
 
 @code {
     private List<string> overdueTasks = new();
-    private Dictionary<string, string> prayerTimes = new();
+    private string prayerTimes = string.Empty;
     private string activity = string.Empty;
     private bool isHome;
-    private string nextPrayerTimeRemaining = string.Empty;
 
     protected override async Task OnInitializedAsync()
     {
@@ -73,28 +66,5 @@
         prayerTimes = await PrayerTimes.GetPrayerTimesAsync();
         activity = await ActivityWatchIntegration.GetCurrentActivityAsync();
         isHome = await WifiPresence.IsPhoneConnectedAsync();
-        CalculateNextPrayer();
-    }
-
-    private void CalculateNextPrayer()
-    {
-        if (prayerTimes == null) return;
-
-        var now = DateTime.Now;
-        var nextPrayer = prayerTimes
-            .Select(kvp => new { Name = kvp.Key, Time = DateTime.Parse(kvp.Value) })
-            .Where(p => p.Time > now)
-            .OrderBy(p => p.Time)
-            .FirstOrDefault();
-
-        if (nextPrayer != null)
-        {
-            var timeDiff = nextPrayer.Time - now;
-            nextPrayerTimeRemaining = $"{timeDiff.Hours}h {timeDiff.Minutes}m";
-        }
-        else
-        {
-            nextPrayerTimeRemaining = "No more prayers for today";
-        }
     }
 }

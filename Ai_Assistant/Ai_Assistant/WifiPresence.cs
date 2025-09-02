@@ -6,16 +6,16 @@ namespace Ai_Assistant
 {
     public class WifiPresence
     {
-        private readonly SettingsService _settingsService;
+        private readonly ISettingsService _settingsService;
 
-        public WifiPresence(SettingsService settingsService)
+        public WifiPresence(ISettingsService settingsService)
         {
             _settingsService = settingsService;
         }
 
-        public async Task<bool> IsPhoneConnected()
+        public async Task<bool> IsPhoneConnectedAsync()
         {
-            var settings = await _settingsService.GetSettings();
+            var settings = await _settingsService.LoadSettingsAsync();
             if (string.IsNullOrEmpty(settings?.PhoneIp))
             {
                 return false;

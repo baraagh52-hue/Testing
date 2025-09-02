@@ -7,18 +7,18 @@ namespace Ai_Assistant
 {
     public class PrayerTimes
     {
-        private readonly SettingsService _settingsService;
+        private readonly ISettingsService _settingsService;
         private readonly HttpClient _httpClient;
 
-        public PrayerTimes(SettingsService settingsService, HttpClient httpClient)
+        public PrayerTimes(ISettingsService settingsService, HttpClient httpClient)
         {
             _settingsService = settingsService;
             _httpClient = httpClient;
         }
 
-        public async Task<string> GetNextPrayer()
+        public async Task<string> GetPrayerTimesAsync()
         {
-            var settings = await _settingsService.GetSettings();
+            var settings = await _settingsService.LoadSettingsAsync();
             if (string.IsNullOrEmpty(settings?.City) || string.IsNullOrEmpty(settings.Country) || string.IsNullOrEmpty(settings.PrayerTimesApiUrl))
             {
                 return "Prayer times settings are not configured.";
