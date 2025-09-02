@@ -1,0 +1,6 @@
+[Desktop Entry]
+Name=AI Assistant
+Exec=/opt/ai-assistant/Ai_Assistant.Blazor
+Terminal=false
+Type=Application
+Categories=Utility;

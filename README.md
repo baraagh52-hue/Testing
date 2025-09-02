@@ -1,0 +1,69 @@
+# AI Assistant
+
+This is a personal AI assistant application built with .NET and Blazor. It provides a range of features to help you with your daily tasks and information needs.
+
+## Features
+
+*   **Voice Interaction:** Uses Speech-to-Text (STT) and Text-to-Speech (TTS) for hands-free interaction.
+*   **Wake Word Detection:** Listens for a wake word to start interacting.
+*   **Prayer Times:** Calculates and displays daily prayer times.
+*   **To-Do List Integration:** Manages your tasks by integrating with a to-do list.
+*   **Presence Detection:** Can detect user presence via WiFi networks.
+*   **Activity Tracking:** Integrates with ActivityWatch to monitor your activity.
+*   **Dashboard:** A central dashboard to view information.
+*   **Settings:** A page to configure the application's various services.
+
+## Getting Started
+
+This project is designed to be packaged and installed as a Debian (`.deb`) file for easy installation on Debian-based Linux distributions like Ubuntu.
+
+### Prerequisites
+
+To build the package, you will need to have the .NET 8 SDK installed.
+
+```bash
+# Download and run the install script
+wget https://dot.net/v1/dotnet-install.sh -O dotnet-install.sh
+chmod +x ./dotnet-install.sh
+./dotnet-install.sh --version latest
+
+# Add .NET to your PATH
+export PATH="$HOME/.dotnet:$PATH"
+```
+
+### Building the Debian Package
+
+1.  **Publish the Application:**
+    This command builds the project and stages it in the correct directory for packaging.
+
+    ```bash
+    $HOME/.dotnet/dotnet publish Ai_Assistant/Ai_Assistant.sln -c Release -r linux-x64 --self-contained true -o Ai_Assistant/Ai_Assistant.Blazor/debian/opt/ai-assistant
+    ```
+
+2.  **Build the Package:**
+    This command uses `dpkg-deb` to create the `.deb` file.
+
+    ```bash
+    dpkg-deb --build Ai_Assistant/Ai_Assistant.Blazor/debian
+    ```
+
+    This will create a `debian.deb` file in your project directory.
+
+### Installation
+
+Install the application using `apt`. This will also automatically handle the installation of required dependencies like `libicu-dev` and `libssl-dev`.
+
+```bash
+sudo apt install ./debian.deb
+```
+
+## Usage
+
+After installation, you can launch the AI Assistant from your desktop's application menu. The application will run in the background.
+
+You can also run it from the terminal with the command:
+
+```bash
+ai-assistant
+```
+The application will be accessible in your web browser, typically at `http://localhost:5000`.

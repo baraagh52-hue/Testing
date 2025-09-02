@@ -1,0 +1,5 @@
+#!/bin/sh
+
+set -e
+
+ln -s /opt/ai-assistant/Ai_Assistant.Blazor /usr/local/bin/ai-assistant

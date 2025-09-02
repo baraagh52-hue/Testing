@@ -1,0 +1,6 @@
+Package: ai-assistant
+Version: 1.0.0
+Architecture: amd64
+Maintainer: Your Name <your.email@example.com>
+Description: An AI assistant application.
+Depends: libicu-dev, libssl-dev
