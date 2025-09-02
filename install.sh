@@ -16,6 +16,12 @@ sudo apt-get install -y libicu-dev libssl-dev
 git clone https://github.com/prompt-engineering/ai-assistant.git
 cd ai-assistant
 
+# Create .gitignore
+cat << EOF > .gitignore
+**/bin
+**/obj
+EOF
+
 # Build and Publish
 $HOME/.dotnet/dotnet publish Ai_Assistant/Ai_Assistant.sln -c Release -r linux-x64 --self-contained true
 
