@@ -1,9 +1,13 @@
+
 @page "/dashboard"
 @using Ai_Assistant
+@using System
+@using System.Globalization
 @inject ToDoIntegration ToDoIntegration
 @inject PrayerTimes PrayerTimes
 @inject ActivityWatchIntegration ActivityWatchIntegration
 @inject WifiPresence WifiPresence
+@inject ISettingsService SettingsService
 
 <h1>AI Assistant Dashboard</h1>
 
@@ -30,19 +34,20 @@
     </div>
     <div class="col">
         <h2>Prayer Times</h2>
-        <ul>
-            @if (prayerTimes == null)
-            {
-                <li>Loading...</li>
-            }
-            else
-            {
-                foreach (var kvp in prayerTimes)
+        @if (prayerTimes == null)
+        {
+            <p>Loading...</p>
+        }
+        else
+        {
+            <ul>
+                @foreach (var kvp in prayerTimes)
                 {
-                    <li>@kvp.Key: @kvp.Value</li>
+                    <li>@kvp.Key: @DateTime.Parse(kvp.Value).ToString("HH:mm")</li>
                 }
-            }
-        </ul>
+            </ul>
+            <p>Next prayer in: @nextPrayerTimeRemaining</p>
+        }
     </div>
     <div class="col">
         <h2>PC Activity</h2>
@@ -59,12 +64,37 @@
     private Dictionary<string, string> prayerTimes;
     private string activity;
     private bool isHome;
+    private string nextPrayerTimeRemaining;
 
     protected override async Task OnInitializedAsync()
     {
+        var settings = await SettingsService.LoadSettingsAsync();
         overdueTasks = await ToDoIntegration.GetOverdueTasksAsync();
-        prayerTimes = await PrayerTimes.GetPrayerTimesAsync("YourCity", "YourCountry");
+        prayerTimes = await PrayerTimes.GetPrayerTimesAsync(settings.City, settings.Country);
         activity = await ActivityWatchIntegration.GetCurrentActivityAsync();
         isHome = WifiPresence.IsPhoneConnected();
+        CalculateNextPrayer();
+    }
+
+    private void CalculateNextPrayer()
+    {
+        if (prayerTimes == null) return;
+
+        var now = DateTime.Now;
+        var nextPrayer = prayerTimes
+            .Select(kvp => new { Name = kvp.Key, Time = DateTime.Parse(kvp.Value) })
+            .Where(p => p.Time > now)
+            .OrderBy(p => p.Time)
+            .FirstOrDefault();
+
+        if (nextPrayer != null)
+        {
+            var timeDiff = nextPrayer.Time - now;
+            nextPrayerTimeRemaining = $"{timeDiff.Hours}h {timeDiff.Minutes}m";
+        }
+        else
+        {
+            nextPrayerTimeRemaining = "No more prayers for today";
+        }
     }
 }

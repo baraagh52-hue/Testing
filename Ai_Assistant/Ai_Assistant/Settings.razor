@@ -31,6 +31,50 @@ else
         <label>Local LLM URL:</label>
         <input @bind="settings.LocalLLMUrl" />
     </div>
+    <div>
+        <label>ActivityWatch URL:</label>
+        <input @bind="settings.ActivityWatchUrl" />
+    </div>
+    <div>
+        <label>Local LLM Model:</label>
+        <input @bind="settings.LocalLLMModel" />
+    </div>
+    <div>
+        <label>Prayer Times API URL:</label>
+        <input @bind="settings.PrayerTimesApiUrl" />
+    </div>
+    <div>
+        <label>TTS Script:</label>
+        <input @bind="settings.TtsScript" />
+    </div>
+    <div>
+        <label>TTS Output Path:</label>
+        <input @bind="settings.TtsOutputPath" />
+    </div>
+    <div>
+        <label>STT Script:</label>
+        <input @bind="settings.SttScript" />
+    </div>
+    <div>
+        <label>STT Model Path:</label>
+        <input @bind="settings.SttModelPath" />
+    </div>
+    <div>
+        <label>Wake Word Script:</label>
+        <input @bind="settings.WakeWordScript" />
+    </div>
+    <div>
+        <label>Wake Word Keyword File:</label>
+        <input @bind="settings.WakeWordKeywordFile" />
+    </div>
+    <div>
+        <label>Wake Word Model File:</label>
+        <input @bind="settings.WakeWordModelFile" />
+    </div>
+    <div>
+        <label>Wake Word Audio Device:</label>
+        <input @bind="settings.WakeWordAudioDevice" />
+    </div>
     <button @onclick="SaveSettings">Save</button>
 }
 

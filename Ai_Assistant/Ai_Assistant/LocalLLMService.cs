@@ -33,7 +33,7 @@ namespace Ai_Assistant
 
             var requestBody = new
             {
-                model = "mistral", // This can be customized if needed
+                model = settings.LocalLLMModel ?? "mistral", // This can be customized if needed
                 prompt = $"{prompt}\n\nUser: {userInput}\nAssistant:",
                 stream = false
             };

@@ -25,7 +25,7 @@ namespace Ai_Assistant
                 var settings = await _settingsService.LoadSettingsAsync();
                 var encodedCity = Uri.EscapeDataString(settings.City ?? "");
                 var encodedCountry = Uri.EscapeDataString(settings.Country ?? "");
-                var url = $"https://api.aladhan.com/v1/timingsByCity?city={encodedCity}&country={encodedCountry}";
+                var url = $"{settings.PrayerTimesApiUrl}?city={encodedCity}&country={encodedCountry}";
                 Console.WriteLine($"Requesting: {url}");
                 var response = await _httpClient.GetStringAsync(url);
                 using var doc = JsonDocument.Parse(response);

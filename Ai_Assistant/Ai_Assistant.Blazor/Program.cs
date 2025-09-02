@@ -10,6 +10,7 @@ builder.Services.AddRazorPages();
 builder.Services.AddServerSideBlazor();
 
 // Register assistant services
+builder.Services.AddSingleton<ISettingsService, SettingsService>();
 builder.Services.AddSingleton<ToDoIntegration>();
 builder.Services.AddSingleton<PrayerTimes>();
 builder.Services.AddSingleton<ActivityWatchIntegration>();

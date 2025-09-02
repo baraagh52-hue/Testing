@@ -1,3 +1,4 @@
+
 using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
@@ -6,25 +7,25 @@ namespace Ai_Assistant
 {
     public class WakeWordService
     {
-        private readonly string _porcupineScript;
-        private readonly string _keywordFile;
-        private readonly string _modelFile;
-        private readonly string _audioDevice;
+        private readonly ISettingsService _settingsService;
 
-        public WakeWordService(string porcupineScript = "porcupine_wakeword.py", string keywordFile = "keyword.ppn", string modelFile = "porcupine_params.pv", string audioDevice = "default")
+        public WakeWordService(ISettingsService settingsService)
         {
-            _porcupineScript = porcupineScript;
-            _keywordFile = keywordFile;
-            _modelFile = modelFile;
-            _audioDevice = audioDevice;
+            _settingsService = settingsService;
         }
 
         public async Task<bool> WaitForWakeWordAsync(CancellationToken cancellationToken = default)
         {
+            var settings = await _settingsService.LoadSettingsAsync();
+            var wakeWordScript = settings.WakeWordScript ?? "porcupine_wakeword.py";
+            var keywordFile = settings.WakeWordKeywordFile ?? "keyword.ppn";
+            var modelFile = settings.WakeWordModelFile ?? "porcupine_params.pv";
+            var audioDevice = settings.WakeWordAudioDevice ?? "default";
+
             var psi = new ProcessStartInfo
             {
                 FileName = "python3",
-                Arguments = $"{_porcupineScript} --keyword_file {_keywordFile} --model_file {_modelFile} --audio_device {_audioDevice}",
+                Arguments = $"{wakeWordScript} --keyword_file {keywordFile} --model_file {modelFile} --audio_device {audioDevice}",
                 RedirectStandardOutput = true,
                 RedirectStandardError = true,
                 UseShellExecute = false,

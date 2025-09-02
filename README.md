@@ -4,14 +4,15 @@ This is a personal AI assistant application built with .NET and Blazor. It provi
 
 ## Features
 
-*   **Voice Interaction:** Uses Speech-to-Text (STT) and Text-to-Speech (TTS) for hands-free interaction.
+*   **Voice Interaction:** Uses Speech-to-Text (STT) and Text-to-Speech (TTS) for hands-free interaction with a local Large Language Model (LLM).
 *   **Wake Word Detection:** Listens for a wake word to start interacting.
-*   **Prayer Times:** Calculates and displays daily prayer times.
+*   **Prayer Times:** Calculates and displays daily prayer times in 24-hour format, along with the time remaining until the next prayer.
 *   **To-Do List Integration:** Manages your tasks by integrating with a to-do list.
 *   **Presence Detection:** Can detect user presence via WiFi networks.
 *   **Activity Tracking:** Integrates with ActivityWatch to monitor your activity.
-*   **Dashboard:** A central dashboard to view information.
-*   **Settings:** A page to configure the application's various services.
+*   **Dashboard:** A central dashboard to view information from all integrated services.
+*   **Centralized Settings:** All service settings are managed in a single `settings.json` file.
+*   **Settings UI:** A dedicated settings page in the Blazor UI allows for easy modification of all settings.
 
 ## Getting Started
 
@@ -30,6 +31,10 @@ chmod +x ./dotnet-install.sh
 # Add .NET to your PATH
 export PATH="$HOME/.dotnet:$PATH"
 ```
+
+### Configuration
+
+Before building, you may need to configure the application by creating a `settings.json` file in the `Ai_Assistant/Ai_Assistant.Blazor/` directory. This file holds the configuration for the various services. An example `settings.example.json` is provided.
 
 ### Building the Debian Package
 
@@ -51,7 +56,7 @@ export PATH="$HOME/.dotnet:$PATH"
 
 ### Installation
 
-Install the application using `apt`. This will also automatically handle the installation of required dependencies like `libicu-dev` and `libssl-dev`.
+Install the application using `apt`. This will also automatically handle the installation of required dependencies.
 
 ```bash
 sudo apt install ./debian.deb
