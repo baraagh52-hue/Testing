@@ -1,4 +1,3 @@
-
 using System.Diagnostics;
 using System.Threading.Tasks;
 
@@ -6,30 +5,34 @@ namespace Ai_Assistant
 {
     public class TTSService
     {
-        private readonly ISettingsService _settingsService;
+        private readonly SettingsService _settingsService;
 
-        public TTSService(ISettingsService settingsService)
+        public TTSService(SettingsService settingsService)
         {
             _settingsService = settingsService;
         }
 
-        // Uses Coqui TTS via command line for hardware efficiency
         public async Task SpeakAsync(string text)
         {
-            var settings = await _settingsService.LoadSettingsAsync();
-            var ttsScript = settings.TtsScript ?? "tts";
-            var outputPath = settings.TtsOutputPath ?? "output.wav";
-
-            var psi = new ProcessStartInfo
+            var settings = await _settingsService.GetSettings();
+            if (string.IsNullOrEmpty(settings?.TtsScript) || string.IsNullOrEmpty(settings.TtsOutputPath))
             {
-                FileName = "python3",
-                Arguments = $"{ttsScript} --text \"{text.Replace("\"", "'")}\" --out_path {outputPath} && ffplay -nodisp -autoexit {outputPath}",
-                RedirectStandardOutput = true,
-                RedirectStandardError = true,
-                UseShellExecute = false,
-                CreateNoWindow = true
+                // Handle missing settings gracefully
+                return;
+            }
+
+            var process = new Process
+            {
+                StartInfo = new ProcessStartInfo
+                {
+                    FileName = "python",
+                    Arguments = $"{settings.TtsScript} --text \"{text}\" --output_path {settings.TtsOutputPath}",
+                    UseShellExecute = false,
+                    CreateNoWindow = true,
+                }
             };
-            using var process = Process.Start(psi);
+
+            process.Start();
             await process.WaitForExitAsync();
         }
     }

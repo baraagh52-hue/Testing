@@ -1,4 +1,5 @@
 
+using System;
 using System.Net.Http;
 using System.Text.Json;
 using System.Threading.Tasks;
@@ -20,7 +21,13 @@ namespace Ai_Assistant
             try
             {
                 var settings = await _settingsService.LoadSettingsAsync();
-                var activityWatchUrl = settings.ActivityWatchUrl ?? "http://localhost:5600";
+                var activityWatchUrl = settings?.ActivityWatchUrl ?? "http://localhost:5600";
+                if (string.IsNullOrEmpty(activityWatchUrl))
+                {
+                    Console.WriteLine("ActivityWatchIntegration: URL is not configured.");
+                    return "No activity detected";
+                }
+
                 var response = await _httpClient.GetStringAsync($"{activityWatchUrl}/api/0/buckets");
                 using var doc = JsonDocument.Parse(response);
                 foreach (var bucket in doc.RootElement.EnumerateObject())
@@ -35,16 +42,19 @@ namespace Ai_Assistant
                         if (events.GetArrayLength() > 0)
                         {
                             var lastEvent = events[events.GetArrayLength() - 1];
-                            var app = lastEvent.GetProperty("data").GetProperty("app").GetString();
-                            var title = lastEvent.GetProperty("data").GetProperty("title").GetString();
-                            return $"{app}: {title}";
+                            if (lastEvent.TryGetProperty("data", out var data) &&
+                                data.TryGetProperty("app", out var app) &&
+                                data.TryGetProperty("title", out var title))
+                            {
+                                return $"{app.GetString() ?? "Unknown"}: {title.GetString() ?? "Unknown"}";
+                            }
                         }
                     }
                 }
             }
-            catch
+            catch (Exception ex)
             {
-                // Handle errors
+                Console.WriteLine($"Error fetching activity: {ex.Message}");
             }
             return "No activity detected";
         }

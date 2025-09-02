@@ -1,40 +1,42 @@
-
 using System.Diagnostics;
-using System.Threading;
 using System.Threading.Tasks;
 
 namespace Ai_Assistant
 {
     public class STTService
     {
-        private readonly ISettingsService _settingsService;
+        private readonly SettingsService _settingsService;
 
-        public STTService(ISettingsService settingsService)
+        public STTService(SettingsService settingsService)
         {
             _settingsService = settingsService;
         }
 
-        // Uses Vosk via command line for hardware efficiency
-        public async Task<string> ListenAsync(CancellationToken cancellationToken = default)
+        public async Task<string> RecognizeFromMicrophoneAsync()
         {
-            var settings = await _settingsService.LoadSettingsAsync();
-            var sttScript = settings.SttScript ?? "vosk_stt.py";
-            var modelPath = settings.SttModelPath ?? "model";
-
-            var psi = new ProcessStartInfo
+            var settings = await _settingsService.GetSettings();
+            if (string.IsNullOrEmpty(settings?.SttScript) || string.IsNullOrEmpty(settings.SttModelPath))
             {
-                FileName = "python3",
-                Arguments = $"{sttScript} {modelPath}",
-                RedirectStandardOutput = true,
-                RedirectStandardError = true,
-                UseShellExecute = false,
-                CreateNoWindow = true
+                return "STT settings are not configured.";
+            }
+
+            var process = new Process
+            {
+                StartInfo = new ProcessStartInfo
+                {
+                    FileName = "python",
+                    Arguments = $"{settings.SttScript} --model_path {settings.SttModelPath}",
+                    RedirectStandardOutput = true,
+                    UseShellExecute = false,
+                    CreateNoWindow = true,
+                }
             };
-            using var process = Process.Start(psi);
-            cancellationToken.Register(() => process.Kill());
-            string result = await process.StandardOutput.ReadToEndAsync();
+
+            process.Start();
+            string? result = await process.StandardOutput.ReadToEndAsync();
             await process.WaitForExitAsync();
-            return result.Trim();
+
+            return result?.Trim() ?? string.Empty;
         }
     }
 }

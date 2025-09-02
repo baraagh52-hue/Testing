@@ -1,4 +1,5 @@
 
+using System;
 using System.Collections.Generic;
 using System.Net.Http;
 using System.Net.Http.Headers;
@@ -21,33 +22,53 @@ namespace Ai_Assistant
         {
             var overdueTasks = new List<string>();
             var settings = await _settingsService.LoadSettingsAsync();
-            if (string.IsNullOrEmpty(settings.ApiToken))
-                return overdueTasks;
-
-            _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", settings.ApiToken);
-            var url = "https://graph.microsoft.com/v1.0/me/todo/lists";
-            var listsResponse = await _httpClient.GetStringAsync(url);
-            using var listsDoc = JsonDocument.Parse(listsResponse);
-            var lists = listsDoc.RootElement.GetProperty("value");
-            foreach (var list in lists.EnumerateArray())
+            if (settings == null || string.IsNullOrEmpty(settings.ApiToken))
             {
-                var listId = list.GetProperty("id").GetString();
-                var tasksUrl = $"https://graph.microsoft.com/v1.0/me/todo/lists/{listId}/tasks";
-                var tasksResponse = await _httpClient.GetStringAsync(tasksUrl);
-                using var tasksDoc = JsonDocument.Parse(tasksResponse);
-                var tasks = tasksDoc.RootElement.GetProperty("value");
-                foreach (var task in tasks.EnumerateArray())
+                Console.WriteLine("ToDoIntegration: API token is not configured in settings.");
+                return overdueTasks;
+            }
+
+            try
+            {
+                _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", settings.ApiToken);
+                var url = "https://graph.microsoft.com/v1.0/me/todo/lists";
+                var listsResponse = await _httpClient.GetStringAsync(url);
+                using var listsDoc = JsonDocument.Parse(listsResponse);
+                if (listsDoc.RootElement.TryGetProperty("value", out var lists))
                 {
-                    if (task.TryGetProperty("status", out var statusProp) && statusProp.GetString() == "notStarted" &&
-                        task.TryGetProperty("dueDateTime", out var dueProp) &&
-                        dueProp.TryGetProperty("dateTime", out var dateTimeProp))
+                    foreach (var list in lists.EnumerateArray())
                     {
-                        if (System.DateTime.TryParse(dateTimeProp.GetString(), out var dueDate) && dueDate < System.DateTime.UtcNow)
+                        if (list.TryGetProperty("id", out var idElement))
                         {
-                            overdueTasks.Add(task.GetProperty("title").GetString());
+                            var listId = idElement.GetString();
+                            if (string.IsNullOrEmpty(listId)) continue;
+
+                            var tasksUrl = $"https://graph.microsoft.com/v1.0/me/todo/lists/{listId}/tasks";
+                            var tasksResponse = await _httpClient.GetStringAsync(tasksUrl);
+                            using var tasksDoc = JsonDocument.Parse(tasksResponse);
+                            if (tasksDoc.RootElement.TryGetProperty("value", out var tasks))
+                            {
+                                foreach (var task in tasks.EnumerateArray())
+                                {
+                                    if (task.TryGetProperty("status", out var statusProp) && statusProp.GetString() == "notStarted" &&
+                                        task.TryGetProperty("dueDateTime", out var dueProp) &&
+                                        dueProp.TryGetProperty("dateTime", out var dateTimeProp) && dateTimeProp.GetString() != null &&
+                                        DateTime.TryParse(dateTimeProp.GetString(), out var dueDate) && dueDate < DateTime.UtcNow)
+                                    {
+                                        if (task.TryGetProperty("title", out var titleValue))
+                                        {
+                                            overdueTasks.Add(titleValue.GetString() ?? string.Empty);
+                                        }
+                                    }
+                                }
+                            }
                         }
                     }
                 }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error fetching overdue tasks: {ex.Message}");
             }
             return overdueTasks;
         }

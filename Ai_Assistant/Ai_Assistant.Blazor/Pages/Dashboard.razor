@@ -60,19 +60,19 @@
 </div>
 
 @code {
-    private List<string> overdueTasks;
-    private Dictionary<string, string> prayerTimes;
-    private string activity;
+    private List<string> overdueTasks = new();
+    private Dictionary<string, string> prayerTimes = new();
+    private string activity = string.Empty;
     private bool isHome;
-    private string nextPrayerTimeRemaining;
+    private string nextPrayerTimeRemaining = string.Empty;
 
     protected override async Task OnInitializedAsync()
     {
         var settings = await SettingsService.LoadSettingsAsync();
         overdueTasks = await ToDoIntegration.GetOverdueTasksAsync();
-        prayerTimes = await PrayerTimes.GetPrayerTimesAsync(settings.City, settings.Country);
+        prayerTimes = await PrayerTimes.GetPrayerTimesAsync();
         activity = await ActivityWatchIntegration.GetCurrentActivityAsync();
-        isHome = WifiPresence.IsPhoneConnected();
+        isHome = await WifiPresence.IsPhoneConnectedAsync();
         CalculateNextPrayer();
     }
 

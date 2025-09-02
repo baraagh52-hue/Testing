@@ -6,27 +6,30 @@ namespace Ai_Assistant
 {
     public class WifiPresence
     {
-        private readonly ISettingsService _settingsService;
+        private readonly SettingsService _settingsService;
 
-        public WifiPresence(ISettingsService settingsService)
+        public WifiPresence(SettingsService settingsService)
         {
             _settingsService = settingsService;
         }
 
-        public async Task<bool> IsPhoneConnectedAsync()
+        public async Task<bool> IsPhoneConnected()
         {
+            var settings = await _settingsService.GetSettings();
+            if (string.IsNullOrEmpty(settings?.PhoneIp))
+            {
+                return false;
+            }
+
             try
             {
-                var settings = await _settingsService.LoadSettingsAsync();
-                if (string.IsNullOrEmpty(settings.PhoneIp))
-                    return false;
-
                 using var ping = new Ping();
-                var reply = await ping.SendPingAsync(settings.PhoneIp, 1000);
+                var reply = await ping.SendPingAsync(settings.PhoneIp, 1000); // 1-second timeout
                 return reply.Status == IPStatus.Success;
             }
-            catch
+            catch (PingException)
             {
+                // Handle exceptions (e.g., invalid IP format)
                 return false;
             }
         }

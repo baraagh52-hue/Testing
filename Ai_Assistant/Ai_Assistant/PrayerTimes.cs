@@ -1,45 +1,63 @@
-
 using System;
-using System.Collections.Generic;
 using System.Net.Http;
-using System.Text.Json;
 using System.Threading.Tasks;
+using Newtonsoft.Json.Linq;
 
 namespace Ai_Assistant
 {
     public class PrayerTimes
     {
-        private readonly HttpClient _httpClient = new();
-        private readonly ISettingsService _settingsService;
+        private readonly SettingsService _settingsService;
+        private readonly HttpClient _httpClient;
 
-        public PrayerTimes(ISettingsService settingsService)
+        public PrayerTimes(SettingsService settingsService, HttpClient httpClient)
         {
             _settingsService = settingsService;
+            _httpClient = httpClient;
         }
 
-        public async Task<Dictionary<string, string>> GetPrayerTimesAsync()
+        public async Task<string> GetNextPrayer()
         {
-            var timings = new Dictionary<string, string>();
+            var settings = await _settingsService.GetSettings();
+            if (string.IsNullOrEmpty(settings?.City) || string.IsNullOrEmpty(settings.Country) || string.IsNullOrEmpty(settings.PrayerTimesApiUrl))
+            {
+                return "Prayer times settings are not configured.";
+            }
+
             try
             {
-                var settings = await _settingsService.LoadSettingsAsync();
-                var encodedCity = Uri.EscapeDataString(settings.City ?? "");
-                var encodedCountry = Uri.EscapeDataString(settings.Country ?? "");
-                var url = $"{settings.PrayerTimesApiUrl}?city={encodedCity}&country={encodedCountry}";
-                Console.WriteLine($"Requesting: {url}");
-                var response = await _httpClient.GetStringAsync(url);
-                using var doc = JsonDocument.Parse(response);
-                var timingsElement = doc.RootElement.GetProperty("data").GetProperty("timings");
-                foreach (var timing in timingsElement.EnumerateObject())
+                var response = await _httpClient.GetStringAsync($"{settings.PrayerTimesApiUrl}?city={settings.City}&country={settings.Country}");
+                var prayerData = JObject.Parse(response);
+                var times = prayerData["data"]?["timings"];
+
+                if (times == null)
                 {
-                    timings[timing.Name] = timing.Value.GetString();
+                    return "Could not retrieve prayer times.";
                 }
+
+                var now = DateTime.Now;
+                string? nextPrayerName = null;
+                DateTime nextPrayerTime = DateTime.MaxValue;
+
+                foreach (var prayer in times.Children<JProperty>())
+                {
+                    if (DateTime.TryParse(prayer.Value.ToString(), out DateTime prayerTime) && prayerTime > now)
+                    {
+                        if (prayerTime < nextPrayerTime)
+                        {
+                            nextPrayerTime = prayerTime;
+                            nextPrayerName = prayer.Name;
+                        }
+                    }
+                }
+
+                return nextPrayerName != null ? $"{nextPrayerName} at {nextPrayerTime:h:mm tt}" : "No more prayers for today.";
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Error fetching prayer times: {ex.Message}");
+                // Log the exception
+                return $"Error retrieving prayer times: {ex.Message}";
             }
-            return timings;
         }
     }
 }

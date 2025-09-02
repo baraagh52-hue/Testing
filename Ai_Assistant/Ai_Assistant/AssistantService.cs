@@ -1,4 +1,3 @@
-
 using Microsoft.Extensions.Hosting;
 using System;
 using System.Linq;
@@ -9,128 +8,108 @@ namespace Ai_Assistant
 {
     public class AssistantService : BackgroundService
     {
-        private readonly ToDoIntegration _toDoIntegration;
-        private readonly ActivityWatchIntegration _activityWatchIntegration;
-        private readonly PrayerTimes _prayerTimes;
-        private readonly WifiPresence _wifiPresence;
+        private readonly IServiceProvider _serviceProvider;
+        private readonly WakeWordService _wakeWordService;
         private readonly TTSService _ttsService;
         private readonly STTService _sttService;
-        private readonly WakeWordService _wakeWordService;
-        private readonly ISettingsService _settingsService;
         private readonly LocalLLMService _localLLMService;
-        private bool _isConversing = false;
+        private readonly WeatherService _weatherService;
+        private readonly ActivityWatchService _activityWatchService;
+        private readonly WifiPresence _wifiPresence;
+        private readonly PrayerTimes _prayerTimes;
+        private readonly ToDoIntegration _toDoIntegration;
+        private readonly PersonalityService _personalityService;
 
         public AssistantService(
-            ToDoIntegration toDoIntegration,
-            ActivityWatchIntegration activityWatchIntegration,
-            PrayerTimes prayerTimes,
-            WifiPresence wifiPresence,
+            IServiceProvider serviceProvider,
+            WakeWordService wakeWordService,
             TTSService ttsService,
             STTService sttService,
-            WakeWordService wakeWordService,
-            ISettingsService settingsService,
-            LocalLLMService localLLMService)
+            LocalLLMService localLLMService,
+            WeatherService weatherService,
+            ActivityWatchService activityWatchService,
+            WifiPresence wifiPresence,
+            PrayerTimes prayerTimes,
+            ToDoIntegration toDoIntegration,
+            PersonalityService personalityService)
         {
-            _toDoIntegration = toDoIntegration;
-            _activityWatchIntegration = activityWatchIntegration;
-            _prayerTimes = prayerTimes;
-            _wifiPresence = wifiPresence;
+            _serviceProvider = serviceProvider;
+            _wakeWordService = wakeWordService;
             _ttsService = ttsService;
             _sttService = sttService;
-            _wakeWordService = wakeWordService;
-            _settingsService = settingsService;
             _localLLMService = localLLMService;
+            _weatherService = weatherService;
+            _activityWatchService = activityWatchService;
+            _wifiPresence = wifiPresence;
+            _prayerTimes = prayerTimes;
+            _toDoIntegration = toDoIntegration;
+            _personalityService = personalityService;
         }
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
-            Console.WriteLine("Starting AI Assistant Service...");
-            await _ttsService.SpeakAsync("Starting AI Assistant Service");
-
-            Console.WriteLine("AI Assistant Service is running. Listening for commands...");
-            await _ttsService.SpeakAsync("AI Assistant is running. Listening for commands.");
-
-            // Wake word loop
-            _ = Task.Run(async () =>
-            {
-                while (!stoppingToken.IsCancellationRequested)
-                {
-                    bool detected = await _wakeWordService.WaitForWakeWordAsync(stoppingToken);
-                    if (detected)
-                    {
-                        _isConversing = true;
-                        await _ttsService.SpeakAsync("Yes?");
-                        var userInput = await _sttService.ListenAsync(stoppingToken);
-                        if (!string.IsNullOrEmpty(userInput))
-                        {
-                            await _ttsService.SpeakAsync("Thinking...");
-                            var response = await _localLLMService.GetResponseAsync(userInput);
-                            await _ttsService.SpeakAsync(response);
-                        }
-                        else
-                        {
-                            await _ttsService.SpeakAsync("Sorry, I didn't catch that.");
-                        }
-                        _isConversing = false;
-                    }
-                }
-            }, stoppingToken);
+            await Task.Delay(1000, stoppingToken); // Initial delay
 
             while (!stoppingToken.IsCancellationRequested)
             {
-                if (!_isConversing)
+                if (await _wakeWordService.IsWakeWordDetected(stoppingToken))
                 {
-                    await CheckTasks();
-                    await CheckWifiPresence();
-                    await CheckActivity();
+                    await HandleWakeWord();
                 }
-                await Task.Delay(TimeSpan.FromMinutes(5), stoppingToken);
+                await Task.Delay(100, stoppingToken); // Small delay to prevent tight loop
             }
         }
 
-        private async Task CheckTasks()
+        private async Task HandleWakeWord()
         {
-            if (_isConversing) return;
-            var overdueTasks = await _toDoIntegration.GetOverdueTasksAsync();
-            if (overdueTasks.Count > 0)
+            var sttTask = _sttService.RecognizeFromMicrophoneAsync();
+            var transcription = await sttTask;
+
+            if (string.IsNullOrEmpty(transcription))
             {
-                var msg = $"You have {overdueTasks.Count} overdue tasks: {string.Join(", ", overdueTasks)}";
-                Console.WriteLine(msg);
-                await _ttsService.SpeakAsync(msg);
-            }
-        }
-
-        private async Task CheckWifiPresence()
-        {
-            if (_isConversing) return;
-            bool isConnected = _wifiPresence.IsPhoneConnected();
-            var msg = isConnected ? "Phone is connected to Wi-Fi." : "Phone is not connected.";
-            Console.WriteLine(msg);
-            await _ttsService.SpeakAsync(msg);
-        }
-
-        private async Task CheckActivity()
-        {
-            if (_isConversing) return;
-
-            var settings = await _settingsService.LoadSettingsAsync();
-            if (settings.UnproductiveApps == null || !settings.UnproductiveApps.Any())
-            {
-                Console.WriteLine("No unproductive apps configured.");
+                await _ttsService.SpeakAsync("Sorry, I didn't catch that.");
                 return;
             }
 
-            var activity = await _activityWatchIntegration.GetCurrentActivityAsync();
-            if (string.IsNullOrEmpty(activity)) return;
+            var response = await _localLLMService.GenerateResponse(transcription);
 
-            string unproductiveApp = settings.UnproductiveApps.FirstOrDefault(app => activity.ToLower().Contains(app.ToLower()));
-
-            if (unproductiveApp != null)
+            // Keyword-based actions
+            if (response.Contains("weather"))
             {
-                var msg = $"It looks like you are using {unproductiveApp}, which you consider unproductive. Let's get back to work!";
-                Console.WriteLine(msg);
-                await _ttsService.SpeakAsync(msg);
+                var weather = await _weatherService.GetWeatherAsync();
+                response = $"The current weather is {weather}";
             }
+            else if (response.Contains("next prayer"))
+            {
+                var nextPrayer = await _prayerTimes.GetNextPrayer();
+                response = $"The next prayer is {nextPrayer}";
+            }
+            else if (response.Contains("phone connected"))
+            {
+                var isConnected = await _wifiPresence.IsPhoneConnected();
+                response = isConnected ? "Yes, your phone is connected to the network." : "No, your phone is not on the network.";
+            }
+            else if (response.Contains("unproductive time"))
+            {
+                var unproductiveTime = await _activityWatchService.GetTotalUnproductiveTimeAsync();
+                response = $"You have spent {unproductiveTime} on unproductive tasks today.";
+            }
+            else if (response.Contains("add to-do"))
+            {
+                // Extract the to-do item from the response
+                string? toDoItem = response.Split("add to-do").LastOrDefault()?.Trim();
+                if (!string.IsNullOrEmpty(toDoItem))
+                {
+                    await _toDoIntegration.AddToDoItem(toDoItem);
+                    response = $"I've added \"{toDoItem}\" to your to-do list.";
+                }
+                else
+                {
+                    response = "Sorry, I couldn't figure out what to add.";
+                }
+            }
+
+            await _ttsService.SpeakAsync(response);
         }
     }
 }

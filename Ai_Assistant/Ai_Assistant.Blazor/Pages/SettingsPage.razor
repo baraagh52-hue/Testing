@@ -1,5 +1,5 @@
 
-@page "/settings"
+@page "/settingspage"
 @using Ai_Assistant
 @inject ISettingsService SettingsService
 @inject NavigationManager NavigationManager
@@ -63,12 +63,12 @@ else
 }
 
 @code {
-    private Settings _settings;
+    private Ai_Assistant.Settings _settings;
     private string _newUnproductiveApp;
 
     protected override async Task OnInitializedAsync()
     {
-        _settings = await SettingsService.LoadSettingsAsync();
+        _settings = (Ai_Assistant.Settings)await SettingsService.LoadSettingsAsync();
     }
 
     private void AddUnproductiveApp()
@@ -93,6 +93,6 @@ else
     {
         await SettingsService.SaveSettingsAsync(_settings);
         // Optionally, provide feedback to the user
-        NavigationManager.NavigateTo("/settings", true);
+        NavigationManager.NavigateTo("/settingspage", true);
     }
 }

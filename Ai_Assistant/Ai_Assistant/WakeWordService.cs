@@ -1,4 +1,3 @@
-
 using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
@@ -7,41 +6,37 @@ namespace Ai_Assistant
 {
     public class WakeWordService
     {
-        private readonly ISettingsService _settingsService;
+        private readonly SettingsService _settingsService;
 
-        public WakeWordService(ISettingsService settingsService)
+        public WakeWordService(SettingsService settingsService)
         {
             _settingsService = settingsService;
         }
 
-        public async Task<bool> WaitForWakeWordAsync(CancellationToken cancellationToken = default)
+        public async Task<bool> IsWakeWordDetected(CancellationToken cancellationToken)
         {
-            var settings = await _settingsService.LoadSettingsAsync();
-            var wakeWordScript = settings.WakeWordScript ?? "porcupine_wakeword.py";
-            var keywordFile = settings.WakeWordKeywordFile ?? "keyword.ppn";
-            var modelFile = settings.WakeWordModelFile ?? "porcupine_params.pv";
-            var audioDevice = settings.WakeWordAudioDevice ?? "default";
-
-            var psi = new ProcessStartInfo
+            var settings = await _settingsService.GetSettings();
+            if (string.IsNullOrEmpty(settings?.WakeWordScript))
             {
-                FileName = "python3",
-                Arguments = $"{wakeWordScript} --keyword_file {keywordFile} --model_file {modelFile} --audio_device {audioDevice}",
-                RedirectStandardOutput = true,
-                RedirectStandardError = true,
-                UseShellExecute = false,
-                CreateNoWindow = true
-            };
-            using var process = Process.Start(psi);
-            while (!process.HasExited && !cancellationToken.IsCancellationRequested)
-            {
-                var line = await process.StandardOutput.ReadLineAsync();
-                if (line != null && line.Contains("wakeword_detected"))
-                {
-                    process.Kill();
-                    return true;
-                }
+                return false;
             }
-            return false;
+
+            var process = new Process
+            {
+                StartInfo = new ProcessStartInfo
+                {
+                    FileName = "python",
+                    Arguments = $"{settings.WakeWordScript} --keyword_file_path {settings.WakeWordKeywordFile} --model_file_path {settings.WakeWordModelFile} --audio_device_index {settings.WakeWordAudioDevice}",
+                    RedirectStandardOutput = true,
+                    UseShellExecute = false,
+                    CreateNoWindow = true,
+                }
+            };
+
+            process.Start();
+            await process.WaitForExitAsync(cancellationToken);
+
+            return process.ExitCode == 0;
         }
     }
 }

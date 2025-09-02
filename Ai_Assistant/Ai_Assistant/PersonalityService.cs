@@ -8,8 +8,8 @@ namespace Ai_Assistant
     public class PersonalityService
     {
         private readonly ISettingsService _settingsService;
-        private List<Personality> _personalities;
-        private Personality _activePersonality;
+        private List<Personality> _personalities = new();
+        private Personality? _activePersonality;
 
         public PersonalityService(ISettingsService settingsService)
         {
@@ -28,7 +28,7 @@ namespace Ai_Assistant
             return _personalities;
         }
 
-        public Personality GetActivePersonality()
+        public Personality? GetActivePersonality()
         {
             return _activePersonality;
         }
